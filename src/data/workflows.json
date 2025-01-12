@@ -1,0 +1,54 @@
+[
+  {
+    "id": "wf_1736677887669",
+    "name": "Test workflow",
+    "nodes": [
+      {
+        "id": "node_1736677868458_601",
+        "type": "default",
+        "position": {
+          "x": 396.828125,
+          "y": 88
+        },
+        "data": {
+          "label": "slack",
+          "nodeType": "slack",
+          "config": {}
+        },
+        "width": 150,
+        "height": 40
+      },
+      {
+        "id": "node_1736677871029_923",
+        "type": "default",
+        "position": {
+          "x": 323.328125,
+          "y": 24
+        },
+        "data": {
+          "label": "telegram",
+          "nodeType": "telegram",
+          "config": {}
+        },
+        "width": 150,
+        "height": 40,
+        "selected": true,
+        "positionAbsolute": {
+          "x": 323.328125,
+          "y": 24
+        },
+        "dragging": false
+      }
+    ],
+    "edges": [
+      {
+        "source": "node_1736677871029_923",
+        "sourceHandle": null,
+        "target": "node_1736677868458_601",
+        "targetHandle": null,
+        "animated": true,
+        "id": "reactflow__edge-node_1736677871029_923-node_1736677868458_601"
+      }
+    ]
+  }
+]
