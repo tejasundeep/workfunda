@@ -2,6 +2,19 @@ import React from 'react';
 import { Form } from 'react-bootstrap';
 
 export default function EmailNodeConfig({ data, onChange }) {
+  const validateEmail = (email) => {
+    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    return emailRegex.test(email);
+  };
+
+  const handleInputChange = (key, value) => {
+    if (key === 'to' && !validateEmail(value)) {
+      alert('Invalid email address');
+      return;
+    }
+    onChange(key, value);
+  };
+
   return (
     <div>
       <Form.Group className="mb-3">
@@ -9,7 +22,7 @@ export default function EmailNodeConfig({ data, onChange }) {
         <Form.Control
           type="email"
           value={data.config?.to || ''}
-          onChange={(e) => onChange('to', e.target.value)}
+          onChange={(e) => handleInputChange('to', e.target.value)}
           placeholder="recipient@example.com"
         />
       </Form.Group>
@@ -18,7 +31,7 @@ export default function EmailNodeConfig({ data, onChange }) {
         <Form.Control
           type="text"
           value={data.config?.subject || ''}
-          onChange={(e) => onChange('subject', e.target.value)}
+          onChange={(e) => handleInputChange('subject', e.target.value)}
           placeholder="Email subject"
         />
       </Form.Group>
@@ -28,7 +41,7 @@ export default function EmailNodeConfig({ data, onChange }) {
           as="textarea"
           rows={3}
           value={data.config?.message || ''}
-          onChange={(e) => onChange('message', e.target.value)}
+          onChange={(e) => handleInputChange('message', e.target.value)}
           placeholder="Email message"
         />
       </Form.Group>

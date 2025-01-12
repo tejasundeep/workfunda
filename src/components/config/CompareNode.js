@@ -19,11 +19,24 @@ export default function CompareNode({ data, onChange }) {
     onChange('conditions', newConditions);
   };
 
-  const updateCondition = (index, field, value) => {
+  const validateCondition = (condition) => {
+    if (!condition.field || !condition.operator || condition.value === undefined) {
+      return false;
+    }
+    return true;
+  };
+
+  const handleConditionChange = (index, key, value) => {
     const newConditions = [...conditions];
-    newConditions[index] = { ...newConditions[index], [field]: value };
+    newConditions[index] = { ...newConditions[index], [key]: value };
+    if (!validateCondition(newConditions[index])) {
+      alert('Invalid condition');
+      return;
+    }
     onChange('conditions', newConditions);
   };
+
+  const operators = ['equals', 'not equals', 'greater than', 'less than'];
 
   return (
     <div>
@@ -39,82 +52,37 @@ export default function CompareNode({ data, onChange }) {
       </Form.Group>
 
       {conditions.map((condition, index) => (
-        <div key={index} className="border p-3 mb-3 rounded">
-          <Row className="mb-2">
-            <Col>
-              <Form.Group>
-                <Form.Label>Field</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={condition.field}
-                  onChange={(e) => updateCondition(index, 'field', e.target.value)}
-                  placeholder="data.fieldName"
-                />
-              </Form.Group>
-            </Col>
-            <Col>
-              <Form.Group>
-                <Form.Label>Operator</Form.Label>
-                <Form.Select
-                  value={condition.operator}
-                  onChange={(e) => updateCondition(index, 'operator', e.target.value)}
-                >
-                  <option value="equals">Equals</option>
-                  <option value="notEquals">Not Equals</option>
-                  <option value="contains">Contains</option>
-                  <option value="greaterThan">Greater Than</option>
-                  <option value="lessThan">Less Than</option>
-                  <option value="regex">Matches Regex</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
-
-          <Row className="mb-2">
-            <Col>
-              <Form.Group>
-                <Form.Label>Value</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={condition.value}
-                  onChange={(e) => updateCondition(index, 'value', e.target.value)}
-                  placeholder="Comparison value"
-                />
-              </Form.Group>
-            </Col>
-            {index < conditions.length - 1 && (
-              <Col>
-                <Form.Group>
-                  <Form.Label>Combine With</Form.Label>
-                  <Form.Select
-                    value={condition.combineOperator}
-                    onChange={(e) => updateCondition(index, 'combineOperator', e.target.value)}
-                  >
-                    <option value="and">AND</option>
-                    <option value="or">OR</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            )}
-          </Row>
-
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={() => removeCondition(index)}
-          >
-            Remove Condition
-          </Button>
-        </div>
+        <Row key={index} className="mb-3">
+          <Col>
+            <Form.Control
+              type="text"
+              value={condition.field}
+              onChange={(e) => handleConditionChange(index, 'field', e.target.value)}
+              placeholder="Field"
+            />
+          </Col>
+          <Col>
+            <Form.Select
+              value={condition.operator}
+              onChange={(e) => handleConditionChange(index, 'operator', e.target.value)}
+            >
+              {operators.map(op => <option key={op} value={op}>{op}</option>)}
+            </Form.Select>
+          </Col>
+          <Col>
+            <Form.Control
+              type="text"
+              value={condition.value}
+              onChange={(e) => handleConditionChange(index, 'value', e.target.value)}
+              placeholder="Value"
+            />
+          </Col>
+          <Col>
+            <Button variant="danger" onClick={() => removeCondition(index)}>Remove</Button>
+          </Col>
+        </Row>
       ))}
-
-      <Button
-        variant="secondary"
-        onClick={addCondition}
-        className="w-100"
-      >
-        Add Condition
-      </Button>
+      <Button variant="primary" onClick={addCondition}>Add Condition</Button>
     </div>
   );
 }
