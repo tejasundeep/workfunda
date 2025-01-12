@@ -2,6 +2,23 @@ import React from 'react';
 import { Form } from 'react-bootstrap';
 
 export default function FunctionNode({ data, onChange }) {
+  const validateJavaScript = (code) => {
+    try {
+      new Function(code);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const handleCodeChange = (value) => {
+    if (!validateJavaScript(value)) {
+      alert('Invalid JavaScript code');
+      return;
+    }
+    onChange('code', value);
+  };
+
   return (
     <div>
       <Form.Group className="mb-3">
@@ -10,7 +27,7 @@ export default function FunctionNode({ data, onChange }) {
           as="textarea"
           rows={15}
           value={data.config?.code || defaultFunctionCode}
-          onChange={(e) => onChange('code', e.target.value)}
+          onChange={(e) => handleCodeChange(e.target.value)}
           style={{ fontFamily: 'monospace' }}
         />
         <Form.Text className="text-muted">

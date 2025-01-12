@@ -1,6 +1,6 @@
 import React from 'react';
 import { ListGroup } from 'react-bootstrap';
-import { SiSlack, SiTelegram } from 'react-icons/si';
+import { SiSlack, SiTelegram, SiJira } from 'react-icons/si';
 import { 
   FaBolt, 
   FaTools, 
@@ -14,7 +14,13 @@ import {
   FaBalanceScale,
   FaExchangeAlt,
   FaJsSquare,
-  FaDatabase
+  FaDatabase,
+  FaFolderOpen,
+  FaEnvelopeOpenText,
+  FaCloud,
+  FaPhone,
+  FaCreditCard,
+  FaGithub
 } from 'react-icons/fa';
 
 export default function Sidebar() {
@@ -29,10 +35,22 @@ export default function Sidebar() {
     { label: 'Set', type: 'set', icon: <FaDatabase /> },
     { label: 'Split', type: 'split', icon: <FaRandom /> },
     { label: 'Merge', type: 'merge', icon: <FaObjectGroup /> },
-    { label: 'Slack Message', type: 'slack', icon: <SiSlack /> },
+    { label: 'MySQL', type: 'mysql', icon: <FaDatabase /> },
+    { label: 'AWS', type: 'aws', icon: <FaCloud /> },
+    { label: 'Slack', type: 'slack', icon: <SiSlack /> },
     { label: 'Telegram Message', type: 'telegram', icon: <SiTelegram /> },
     { label: 'Email', type: 'email', icon: <FaEnvelope /> },
     { label: 'Scheduler', type: 'scheduler', icon: <FaClock /> },
+    { label: 'Webhook', type: 'webhook', icon: <FaExchangeAlt /> },
+    { label: 'File System', type: 'filesystem', icon: <FaFolderOpen /> },
+    { label: 'Database', type: 'database', icon: <FaDatabase /> },
+    { label: 'Email', type: 'emailtrigger', icon: <FaEnvelopeOpenText /> },
+    { label: 'Google Cloud', type: 'googlecloud', icon: <FaCloud /> },
+    { label: 'Azure', type: 'azure', icon: <FaCloud /> },
+    { label: 'Twilio', type: 'twilio', icon: <FaPhone /> },
+    { label: 'Stripe', type: 'stripe', icon: <FaCreditCard /> },
+    { label: 'GitHub', type: 'github', icon: <FaGithub /> },
+    { label: 'Jira', type: 'jira', icon: <SiJira /> },
   ];
 
   const onDragStart = (event, nodeType) => {

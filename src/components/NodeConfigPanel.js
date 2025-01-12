@@ -10,6 +10,19 @@ import CompareNode from './config/CompareNode';
 import SwitchNode from './config/SwitchNode';
 import FunctionNode from './config/FunctionNode';
 import SetNode from './config/SetNode';
+import WebhookNode from './config/WebhookNode';
+import FileSystemNode from './config/FileSystemNode';
+import DatabaseNode from './config/DatabaseNode';
+import EmailTriggerNode from './config/EmailTriggerNode';
+import MySQLNode from './config/MySQLNode';
+import AWSNode from './config/AWSNode';
+import SlackNode from './config/SlackNode';
+import GoogleCloudNode from './config/GoogleCloudNode';
+import AzureNode from './config/AzureNode';
+import TwilioNode from './config/TwilioNode';
+import StripeNode from './config/StripeNode';
+import GitHubNode from './config/GitHubNode';
+import JiraNode from './config/JiraNode';
 
 export default function NodeConfigPanel({ nodes, setNodes, selectedNodeId }) {
   const selectedNode = useMemo(
@@ -81,24 +94,10 @@ export default function NodeConfigPanel({ nodes, setNodes, selectedNodeId }) {
         );
       case 'slack':
         return (
-          <>
-            <Form.Group className="mb-3">
-              <Form.Label>Channel</Form.Label>
-              <Form.Control
-                type="text"
-                value={selectedNode.data.config?.channel || ''}
-                onChange={(e) => updateNodeConfig('channel', e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Text</Form.Label>
-              <Form.Control
-                type="text"
-                value={selectedNode.data.config?.text || ''}
-                onChange={(e) => updateNodeConfig('text', e.target.value)}
-              />
-            </Form.Group>
-          </>
+          <SlackNode
+            data={selectedNode.data}
+            onChange={updateNodeConfig}
+          />
         );
       case 'telegram':
         return (
@@ -177,6 +176,30 @@ export default function NodeConfigPanel({ nodes, setNodes, selectedNodeId }) {
             onChange={updateNodeConfig}
           />
         );
+      case 'webhook':
+        return <WebhookNode data={selectedNode.data} onChange={updateNodeConfig} />;
+      case 'filesystem':
+        return <FileSystemNode data={selectedNode.data} onChange={updateNodeConfig} />;
+      case 'database':
+        return <DatabaseNode data={selectedNode.data} onChange={updateNodeConfig} />;
+      case 'emailtrigger':
+        return <EmailTriggerNode data={selectedNode.data} onChange={updateNodeConfig} />;
+      case 'mysql':
+        return <MySQLNode data={selectedNode.data} onChange={updateNodeConfig} />;
+      case 'aws':
+        return <AWSNode data={selectedNode.data} onChange={updateNodeConfig} />;
+      case 'googlecloud':
+        return <GoogleCloudNode data={selectedNode.data} onChange={updateNodeConfig} />;
+      case 'azure':
+        return <AzureNode data={selectedNode.data} onChange={updateNodeConfig} />;
+      case 'twilio':
+        return <TwilioNode data={selectedNode.data} onChange={updateNodeConfig} />;
+      case 'stripe':
+        return <StripeNode data={selectedNode.data} onChange={updateNodeConfig} />;
+      case 'github':
+        return <GitHubNode data={selectedNode.data} onChange={updateNodeConfig} />;
+      case 'jira':
+        return <JiraNode data={selectedNode.data} onChange={updateNodeConfig} />;
       default:
         return <p>No configuration available for this node type.</p>;
     }
