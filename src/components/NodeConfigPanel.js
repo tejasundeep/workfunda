@@ -1,31 +1,63 @@
 import React, { useMemo } from 'react';
 import { Card, Form } from 'react-bootstrap';
-import EmailNodeConfig from './config/EmailNode';
-import SchedulerNode from './config/SchedulerNode';
-import HTTPNode from './config/HTTPNode';
+import { useDispatch } from 'react-redux';
+import { updateNodeConfig } from '../store/store';
+
+// Data Processing
 import TransformNode from './config/TransformNode';
-import SplitNode from './config/SplitNode';
-import MergeNode from './config/MergeNode';
 import CompareNode from './config/CompareNode';
 import SwitchNode from './config/SwitchNode';
 import FunctionNode from './config/FunctionNode';
 import SetNode from './config/SetNode';
-import WebhookNode from './config/WebhookNode';
-import FileSystemNode from './config/FileSystemNode';
+import SplitNode from './config/SplitNode';
+import MergeNode from './config/MergeNode';
+import ValidationNode from './config/ValidationNode';
+
+// Data Storage & Caching
 import DatabaseNode from './config/DatabaseNode';
-import EmailTriggerNode from './config/EmailTriggerNode';
+import CacheNode from './config/CacheNode';
+import QueueNode from './config/QueueNode';
 import MySQLNode from './config/MySQLNode';
-import AWSNode from './config/AWSNode';
+
+// Security & Performance
+import AuthenticationNode from './config/AuthenticationNode';
+import EncryptionNode from './config/EncryptionNode';
+import RateLimitNode from './config/RateLimitNode';
+
+// Communication & Notifications
+import HTTPNode from './config/HTTPNode';
+import WebhookNode from './config/WebhookNode';
+import EmailNode from './config/EmailNode';
+import NotificationNode from './config/NotificationNode';
 import SlackNode from './config/SlackNode';
+import TelegramNode from './config/TelegramNode';
+import TwilioNode from './config/TwilioNode';
+
+// Monitoring & Logging
+import LoggerNode from './config/LoggerNode';
+import MetricsNode from './config/MetricsNode';
+
+// Cloud Services
+import AWSNode from './config/AWSNode';
 import GoogleCloudNode from './config/GoogleCloudNode';
 import AzureNode from './config/AzureNode';
-import TwilioNode from './config/TwilioNode';
-import StripeNode from './config/StripeNode';
+
+// File Operations
+import FileSystemNode from './config/FileSystemNode';
+import CompressionNode from './config/CompressionNode';
+
+// External Services
+import OpenAINode from './config/OpenAINode';
 import GitHubNode from './config/GitHubNode';
 import JiraNode from './config/JiraNode';
-import OpenAINodeConfig from './config/OpenAINode';
+import StripeNode from './config/StripeNode';
+
+// Triggers & Scheduling
+import SchedulerNode from './config/SchedulerNode';
+import EmailTriggerNode from './config/EmailTriggerNode';
 
 export default function NodeConfigPanel({ nodes, setNodes, selectedNodeId }) {
+  const dispatch = useDispatch();
   const selectedNode = useMemo(
     () => nodes.find((node) => node.id === selectedNodeId),
     [selectedNodeId, nodes]
@@ -38,6 +70,14 @@ export default function NodeConfigPanel({ nodes, setNodes, selectedNodeId }) {
         <p>No node selected.</p>
       </div>
     );
+  }
+
+  // Ensure node.data and node.data.config exist
+  if (!selectedNode.data) {
+    selectedNode.data = {};
+  }
+  if (!selectedNode.data.config) {
+    selectedNode.data.config = {};
   }
 
   const updateNodeData = (key, value) => {
@@ -57,159 +97,122 @@ export default function NodeConfigPanel({ nodes, setNodes, selectedNodeId }) {
     );
   };
 
-  const updateNodeConfig = (key, value) => {
-    setNodes((prev) =>
-      prev.map((n) => {
-        if (n.id === selectedNode.id) {
-          return {
-            ...n,
-            data: {
-              ...n.data,
-              config: {
-                ...n.data.config,
-                [key]: value,
-              },
-            },
-          };
-        }
-        return n;
-      })
-    );
+  const handleConfigChange = (field, value) => {
+    dispatch(updateNodeConfig({ nodeId: selectedNode.id, field, value }));
   };
 
   const renderConfig = () => {
+    // Ensure config exists before passing to components
+    const config = selectedNode.data?.config || {};
+    const nodeProps = {
+      data: {
+        ...selectedNode.data,
+        config,
+      },
+      onChange: handleConfigChange,
+    };
+
     switch (selectedNode.data.nodeType) {
-      case 'email':
-        return (
-          <EmailNodeConfig
-            data={selectedNode.data}
-            onChange={updateNodeConfig}
-          />
-        );
-      case 'scheduler':
-        return (
-          <SchedulerNode
-            data={selectedNode.data}
-            onChange={updateNodeConfig}
-          />
-        );
-      case 'slack':
-        return (
-          <SlackNode
-            data={selectedNode.data}
-            onChange={updateNodeConfig}
-          />
-        );
-      case 'telegram':
-        return (
-          <>
-            <Form.Group className="mb-3">
-              <Form.Label>Chat ID</Form.Label>
-              <Form.Control
-                type="text"
-                value={selectedNode.data.config?.chatId || ''}
-                onChange={(e) => updateNodeConfig('chatId', e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Message</Form.Label>
-              <Form.Control
-                type="text"
-                value={selectedNode.data.config?.text || ''}
-                onChange={(e) => updateNodeConfig('text', e.target.value)}
-              />
-            </Form.Group>
-          </>
-        );
-      case 'http':
-        return (
-          <HTTPNode
-            data={selectedNode.data}
-            onChange={updateNodeConfig}
-          />
-        );
+      // Data Processing
       case 'transform':
-        return (
-          <TransformNode
-            data={selectedNode.data}
-            onChange={updateNodeConfig}
-          />
-        );
-      case 'split':
-        return (
-          <SplitNode
-            data={selectedNode.data}
-            onChange={updateNodeConfig}
-          />
-        );
-      case 'merge':
-        return (
-          <MergeNode
-            data={selectedNode.data}
-            onChange={updateNodeConfig}
-          />
-        );
+        return <TransformNode {...nodeProps} />;
       case 'compare':
-        return (
-          <CompareNode
-            data={selectedNode.data}
-            onChange={updateNodeConfig}
-          />
-        );
+        return <CompareNode {...nodeProps} />;
       case 'switch':
-        return (
-          <SwitchNode
-            data={selectedNode.data}
-            onChange={updateNodeConfig}
-          />
-        );
+        return <SwitchNode {...nodeProps} />;
       case 'function':
-        return (
-          <FunctionNode
-            data={selectedNode.data}
-            onChange={updateNodeConfig}
-          />
-        );
+        return <FunctionNode {...nodeProps} />;
       case 'set':
-        return (
-          <SetNode
-            data={selectedNode.data}
-            onChange={updateNodeConfig}
-          />
-        );
-      case 'webhook':
-        return <WebhookNode data={selectedNode.data} onChange={updateNodeConfig} />;
-      case 'filesystem':
-        return <FileSystemNode data={selectedNode.data} onChange={updateNodeConfig} />;
+        return <SetNode {...nodeProps} />;
+      case 'split':
+        return <SplitNode {...nodeProps} />;
+      case 'merge':
+        return <MergeNode {...nodeProps} />;
+      case 'validation':
+        return <ValidationNode {...nodeProps} />;
+
+      // Data Storage & Caching
       case 'database':
-        return <DatabaseNode data={selectedNode.data} onChange={updateNodeConfig} />;
-      case 'emailtrigger':
-        return <EmailTriggerNode data={selectedNode.data} onChange={updateNodeConfig} />;
+        return <DatabaseNode {...nodeProps} />;
       case 'mysql':
-        return <MySQLNode data={selectedNode.data} onChange={updateNodeConfig} />;
-      case 'aws':
-        return <AWSNode data={selectedNode.data} onChange={updateNodeConfig} />;
-      case 'googlecloud':
-        return <GoogleCloudNode data={selectedNode.data} onChange={updateNodeConfig} />;
-      case 'azure':
-        return <AzureNode data={selectedNode.data} onChange={updateNodeConfig} />;
+        return <MySQLNode {...nodeProps} />;
+      case 'cache':
+        return <CacheNode {...nodeProps} />;
+      case 'queue':
+        return <QueueNode {...nodeProps} />;
+
+      // Security & Performance
+      case 'authentication':
+        return <AuthenticationNode {...nodeProps} />;
+      case 'encryption':
+        return <EncryptionNode {...nodeProps} />;
+      case 'ratelimit':
+        return <RateLimitNode {...nodeProps} />;
+
+      // Communication & Notifications
+      case 'http':
+        return <HTTPNode {...nodeProps} />;
+      case 'webhook':
+        return <WebhookNode {...nodeProps} />;
+      case 'email':
+        return <EmailNode {...nodeProps} />;
+      case 'notification':
+        return <NotificationNode {...nodeProps} />;
+      case 'slack':
+        return <SlackNode {...nodeProps} />;
+      case 'telegram':
+        return <TelegramNode {...nodeProps} />;
       case 'twilio':
-        return <TwilioNode data={selectedNode.data} onChange={updateNodeConfig} />;
-      case 'stripe':
-        return <StripeNode data={selectedNode.data} onChange={updateNodeConfig} />;
-      case 'github':
-        return <GitHubNode data={selectedNode.data} onChange={updateNodeConfig} />;
-      case 'jira':
-        return <JiraNode data={selectedNode.data} onChange={updateNodeConfig} />;
+        return <TwilioNode {...nodeProps} />;
+
+      // Monitoring & Logging
+      case 'logger':
+        return <LoggerNode {...nodeProps} />;
+      case 'metrics':
+        return <MetricsNode {...nodeProps} />;
+
+      // Cloud Services
+      case 'aws':
+        return <AWSNode {...nodeProps} />;
+      case 'googlecloud':
+        return <GoogleCloudNode {...nodeProps} />;
+      case 'azure':
+        return <AzureNode {...nodeProps} />;
+
+      // File Operations
+      case 'filesystem':
+        return <FileSystemNode {...nodeProps} />;
+      case 'compression':
+        return <CompressionNode {...nodeProps} />;
+
+      // External Services
       case 'openai':
+        return <OpenAINode {...nodeProps} />;
+      case 'github':
+        return <GitHubNode {...nodeProps} />;
+      case 'jira':
+        return <JiraNode {...nodeProps} />;
+      case 'stripe':
+        return <StripeNode {...nodeProps} />;
+
+      // Triggers & Scheduling
+      case 'scheduler':
+        return <SchedulerNode {...nodeProps} />;
+      case 'emailtrigger':
+        return <EmailTriggerNode {...nodeProps} />;
+      case 'trigger':
         return (
-          <OpenAINodeConfig
-            data={selectedNode.data}
-            onChange={updateNodeConfig}
-          />
+          <div className="p-3">
+            <p>Basic trigger node - no configuration needed</p>
+          </div>
         );
+
       default:
-        return <p>No configuration available for this node type.</p>;
+        return (
+          <div className="p-3">
+            <p>No configuration available for this node type: {selectedNode.data.nodeType}</p>
+          </div>
+        );
     }
   };
 

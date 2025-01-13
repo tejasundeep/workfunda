@@ -1,109 +1,190 @@
 import React from 'react';
-import { Form, Button } from 'react-bootstrap';
+import ConfigField from '../common/ConfigField';
 
 export default function SwitchNode({ data, onChange }) {
-  const cases = data.config?.cases || [];
-
-  const addCase = () => {
-    onChange('cases', [...cases, {
-      value: '',
-      label: `Case ${cases.length + 1}`
-    }]);
+  const handleChange = (field, value) => {
+    onChange(field, value);
   };
 
-  const removeCase = (index) => {
-    const newCases = [...cases];
-    newCases.splice(index, 1);
-    onChange('cases', newCases);
-  };
-
-  const updateCase = (index, field, value) => {
-    const newCases = [...cases];
-    newCases[index] = { ...newCases[index], [field]: value };
-    onChange('cases', newCases);
-  };
+  const switchTypeOptions = [
+    { value: 'value', label: 'Value Switch' },
+    { value: 'expression', label: 'Expression Switch' },
+    { value: 'regex', label: 'Regular Expression' },
+    { value: 'custom', label: 'Custom Function' }
+  ];
 
   return (
     <div>
-      <Form.Group className="mb-3">
-        <Form.Label>Input Field</Form.Label>
-        <Form.Control
-          type="text"
-          value={data.config?.inputField || ''}
-          onChange={(e) => onChange('inputField', e.target.value)}
-          placeholder="data.fieldName"
+      <ConfigField
+        label="Switch Type"
+        type="select"
+        field="switchType"
+        value={data.config?.switchType}
+        onChange={handleChange}
+        options={switchTypeOptions}
+        required
+      />
+
+      {data.config?.switchType === 'value' && (
+        <>
+          <ConfigField
+            label="Input Value"
+            type="text"
+            field="inputValue"
+            value={data.config?.inputValue}
+            onChange={handleChange}
+            placeholder="Value to switch on"
+            required
+          />
+          <ConfigField
+            label="Cases"
+            type="textarea"
+            field="cases"
+            value={data.config?.cases}
+            onChange={handleChange}
+            placeholder={`[
+  {
+    "value": "case1",
+    "output": "output1"
+  },
+  {
+    "value": "case2",
+    "output": "output2"
+  }
+]`}
+            rows={6}
+            required
+          />
+        </>
+      )}
+
+      {data.config?.switchType === 'expression' && (
+        <>
+          <ConfigField
+            label="Input Expression"
+            type="textarea"
+            field="inputExpression"
+            value={data.config?.inputExpression}
+            onChange={handleChange}
+            placeholder={`// JavaScript expression
+input.value > 10`}
+            rows={3}
+            required
+          />
+          <ConfigField
+            label="Cases"
+            type="textarea"
+            field="cases"
+            value={data.config?.cases}
+            onChange={handleChange}
+            placeholder={`[
+  {
+    "condition": "value > 100",
+    "output": "high"
+  },
+  {
+    "condition": "value > 50",
+    "output": "medium"
+  },
+  {
+    "condition": "value > 0",
+    "output": "low"
+  }
+]`}
+            rows={8}
+            required
+          />
+        </>
+      )}
+
+      {data.config?.switchType === 'regex' && (
+        <>
+          <ConfigField
+            label="Input Pattern"
+            type="text"
+            field="inputPattern"
+            value={data.config?.inputPattern}
+            onChange={handleChange}
+            placeholder="Regular expression pattern"
+            required
+          />
+          <ConfigField
+            label="Cases"
+            type="textarea"
+            field="cases"
+            value={data.config?.cases}
+            onChange={handleChange}
+            placeholder={`[
+  {
+    "pattern": "^user_.*",
+    "output": "user"
+  },
+  {
+    "pattern": "^admin_.*",
+    "output": "admin"
+  }
+]`}
+            rows={6}
+            required
+          />
+          <ConfigField
+            label="Case Sensitive"
+            type="checkbox"
+            field="caseSensitive"
+            value={data.config?.caseSensitive}
+            onChange={handleChange}
+          />
+        </>
+      )}
+
+      {data.config?.switchType === 'custom' && (
+        <ConfigField
+          label="Custom Switch Function"
+          type="textarea"
+          field="customFunction"
+          value={data.config?.customFunction}
+          onChange={handleChange}
+          placeholder={`function switchCase(input) {
+  // Your switch logic here
+  // Return the output case name
+  return 'case1';
+}`}
+          rows={10}
+          required
         />
-        <Form.Text className="text-muted">
-          Specify the field to switch on
-        </Form.Text>
-      </Form.Group>
+      )}
 
-      <Form.Group className="mb-3">
-        <Form.Label>Mode</Form.Label>
-        <Form.Select
-          value={data.config?.mode || 'equals'}
-          onChange={(e) => onChange('mode', e.target.value)}
-        >
-          <option value="equals">Equals</option>
-          <option value="contains">Contains</option>
-          <option value="regex">Matches Regex</option>
-        </Form.Select>
-      </Form.Group>
+      <ConfigField
+        label="Default Case"
+        type="text"
+        field="defaultCase"
+        value={data.config?.defaultCase}
+        onChange={handleChange}
+        placeholder="default"
+      />
 
-      <div className="mb-3">
-        <h6>Cases</h6>
-        {cases.map((caseItem, index) => (
-          <div key={index} className="border p-3 mb-2 rounded">
-            <Form.Group className="mb-2">
-              <Form.Label>Label</Form.Label>
-              <Form.Control
-                type="text"
-                value={caseItem.label}
-                onChange={(e) => updateCase(index, 'label', e.target.value)}
-                placeholder={`Case ${index + 1}`}
-              />
-            </Form.Group>
+      <ConfigField
+        label="Error Handling"
+        type="select"
+        field="errorHandling"
+        value={data.config?.errorHandling}
+        onChange={handleChange}
+        options={[
+          { value: 'throw', label: 'Throw Error' },
+          { value: 'default', label: 'Use Default Case' },
+          { value: 'skip', label: 'Skip Switch' }
+        ]}
+      />
 
-            <Form.Group className="mb-2">
-              <Form.Label>Value</Form.Label>
-              <Form.Control
-                type="text"
-                value={caseItem.value}
-                onChange={(e) => updateCase(index, 'value', e.target.value)}
-                placeholder="Case value"
-              />
-            </Form.Group>
-
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => removeCase(index)}
-            >
-              Remove Case
-            </Button>
-          </div>
-        ))}
-      </div>
-
-      <Button
-        variant="secondary"
-        onClick={addCase}
-        className="w-100 mb-3"
-      >
-        Add Case
-      </Button>
-
-      <Form.Group>
-        <Form.Check
-          type="checkbox"
-          label="Include Default Output"
-          checked={data.config?.includeDefault || false}
-          onChange={(e) => onChange('includeDefault', e.target.checked)}
-        />
-        <Form.Text className="text-muted">
-          Create an output for unmatched cases
-        </Form.Text>
-      </Form.Group>
+      <ConfigField
+        label="Description"
+        type="textarea"
+        field="description"
+        value={data.config?.description}
+        onChange={handleChange}
+        placeholder="Describe the purpose of this switch"
+        rows={2}
+      />
     </div>
   );
 }

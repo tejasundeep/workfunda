@@ -1,95 +1,149 @@
 import React from 'react';
-import { Form } from 'react-bootstrap';
+import ConfigField from '../common/ConfigField';
 
 export default function TransformNode({ data, onChange }) {
+  const handleChange = (field, value) => {
+    onChange(field, value);
+  };
+
+  const transformTypeOptions = [
+    { value: 'map', label: 'Map' },
+    { value: 'filter', label: 'Filter' },
+    { value: 'reduce', label: 'Reduce' },
+    { value: 'custom', label: 'Custom Function' }
+  ];
+
+  const inputTypeOptions = [
+    { value: 'json', label: 'JSON' },
+    { value: 'xml', label: 'XML' },
+    { value: 'csv', label: 'CSV' },
+    { value: 'text', label: 'Plain Text' }
+  ];
+
   return (
     <div>
-      <Form.Group className="mb-3">
-        <Form.Label>Transform Type</Form.Label>
-        <Form.Select
-          value={data.config?.transformType || 'map'}
-          onChange={(e) => onChange('transformType', e.target.value)}
-        >
-          <option value="map">Map</option>
-          <option value="filter">Filter</option>
-          <option value="reduce">Reduce</option>
-          <option value="custom">Custom</option>
-        </Form.Select>
-      </Form.Group>
+      <ConfigField
+        label="Transform Type"
+        type="select"
+        field="transformType"
+        value={data.config?.transformType}
+        onChange={handleChange}
+        options={transformTypeOptions}
+        required
+      />
+
+      <ConfigField
+        label="Input Type"
+        type="select"
+        field="inputType"
+        value={data.config?.inputType}
+        onChange={handleChange}
+        options={inputTypeOptions}
+        required
+      />
+
+      <ConfigField
+        label="Output Type"
+        type="select"
+        field="outputType"
+        value={data.config?.outputType}
+        onChange={handleChange}
+        options={inputTypeOptions}
+        required
+      />
+
+      {data.config?.transformType === 'custom' && (
+        <ConfigField
+          label="Custom Function"
+          type="textarea"
+          field="customFunction"
+          value={data.config?.customFunction}
+          onChange={handleChange}
+          placeholder={`function transform(input) {
+  // Your transformation logic here
+  return output;
+}`}
+          rows={10}
+          required
+        />
+      )}
 
       {data.config?.transformType === 'map' && (
-        <Form.Group className="mb-3">
-          <Form.Label>Map Expression</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={4}
-            value={data.config?.mapExpression || ''}
-            onChange={(e) => onChange('mapExpression', e.target.value)}
-            placeholder="item => ({ ...item, newField: item.oldField })"
-          />
-          <Form.Text className="text-muted">
-            Write a JavaScript arrow function that transforms each item. Example: {'<code>item => ({ ...item, newField: item.oldField })</code>'}
-          </Form.Text>
-        </Form.Group>
+        <ConfigField
+          label="Mapping Template"
+          type="textarea"
+          field="mappingTemplate"
+          value={data.config?.mappingTemplate}
+          onChange={handleChange}
+          placeholder={`{
+  "outputField": "{{inputField}}"
+}`}
+          rows={5}
+          required
+        />
       )}
 
       {data.config?.transformType === 'filter' && (
-        <Form.Group className="mb-3">
-          <Form.Label>Filter Expression</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={4}
-            value={data.config?.filterExpression || ''}
-            onChange={(e) => onChange('filterExpression', e.target.value)}
-            placeholder="item => item.value > 10"
-          />
-          <Form.Text className="text-muted">
-            Write a JavaScript arrow function that returns true/false. Example: <code>{'item => item.value > 10'}</code>
-          </Form.Text>
-        </Form.Group>
+        <ConfigField
+          label="Filter Condition"
+          type="textarea"
+          field="filterCondition"
+          value={data.config?.filterCondition}
+          onChange={handleChange}
+          placeholder={`item => item.value > 0`}
+          rows={3}
+          required
+        />
       )}
 
       {data.config?.transformType === 'reduce' && (
         <>
-          <Form.Group className="mb-3">
-            <Form.Label>Reduce Expression</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={4}
-              value={data.config?.reduceExpression || ''}
-              onChange={(e) => onChange('reduceExpression', e.target.value)}
-              placeholder="(acc, item) => acc + item.value"
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Initial Value</Form.Label>
-            <Form.Control
-              type="text"
-              value={data.config?.initialValue || ''}
-              onChange={(e) => onChange('initialValue', e.target.value)}
-              placeholder="0"
-            />
-          </Form.Group>
+          <ConfigField
+            label="Reducer Function"
+            type="textarea"
+            field="reducerFunction"
+            value={data.config?.reducerFunction}
+            onChange={handleChange}
+            placeholder={`(accumulator, currentValue) => accumulator + currentValue`}
+            rows={3}
+            required
+          />
+          <ConfigField
+            label="Initial Value"
+            type="textarea"
+            field="initialValue"
+            value={data.config?.initialValue}
+            onChange={handleChange}
+            placeholder="0"
+            rows={1}
+            required
+          />
         </>
       )}
 
-      {data.config?.transformType === 'custom' && (
-        <Form.Group className="mb-3">
-          <Form.Label>Custom Code</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={8}
-            value={data.config?.customCode || ''}
-            onChange={(e) => onChange('customCode', e.target.value)}
-            placeholder="function transform(data) {
-  // Your custom transformation logic here
-  return transformedData;
-}"
-          />
-          <Form.Text className="text-muted">
-            Write a JavaScript function that takes input data and returns transformed data
-          </Form.Text>
-        </Form.Group>
+      <ConfigField
+        label="Error Handling"
+        type="select"
+        field="errorHandling"
+        value={data.config?.errorHandling}
+        onChange={handleChange}
+        options={[
+          { value: 'skip', label: 'Skip Failed Items' },
+          { value: 'fail', label: 'Fail Entire Transform' },
+          { value: 'default', label: 'Use Default Value' }
+        ]}
+      />
+
+      {data.config?.errorHandling === 'default' && (
+        <ConfigField
+          label="Default Value"
+          type="textarea"
+          field="defaultValue"
+          value={data.config?.defaultValue}
+          onChange={handleChange}
+          placeholder="Default value for failed transformations"
+          rows={2}
+        />
       )}
     </div>
   );

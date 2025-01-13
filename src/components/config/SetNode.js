@@ -1,135 +1,230 @@
 import React from 'react';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+import ConfigField from '../common/ConfigField';
 
 export default function SetNode({ data, onChange }) {
-  const variables = data.config?.variables || [];
-
-  const addVariable = () => {
-    onChange('variables', [...variables, {
-      name: '',
-      value: '',
-      type: 'string',
-      scope: 'workflow'
-    }]);
+  const handleChange = (field, value) => {
+    onChange(field, value);
   };
 
-  const removeVariable = (index) => {
-    const newVariables = [...variables];
-    newVariables.splice(index, 1);
-    onChange('variables', newVariables);
-  };
+  const operationTypeOptions = [
+    { value: 'set', label: 'Set Value' },
+    { value: 'delete', label: 'Delete Value' },
+    { value: 'increment', label: 'Increment Value' },
+    { value: 'decrement', label: 'Decrement Value' },
+    { value: 'toggle', label: 'Toggle Boolean' },
+    { value: 'append', label: 'Append to Array' },
+    { value: 'prepend', label: 'Prepend to Array' },
+    { value: 'merge', label: 'Merge Objects' }
+  ];
 
-  const updateVariable = (index, field, value) => {
-    const newVariables = [...variables];
-    newVariables[index] = { ...newVariables[index], [field]: value };
-    onChange('variables', newVariables);
-  };
+  const valueTypeOptions = [
+    { value: 'string', label: 'String' },
+    { value: 'number', label: 'Number' },
+    { value: 'boolean', label: 'Boolean' },
+    { value: 'array', label: 'Array' },
+    { value: 'object', label: 'Object' },
+    { value: 'expression', label: 'Expression' }
+  ];
+
+  const mergeStrategyOptions = [
+    { value: 'replace', label: 'Replace' },
+    { value: 'merge', label: 'Deep Merge' },
+    { value: 'concat', label: 'Concatenate Arrays' },
+    { value: 'union', label: 'Array Union' }
+  ];
 
   return (
     <div>
-      <Form.Group className="mb-3">
-        <Form.Label>Keep Only Set Variables</Form.Label>
-        <Form.Check
-          type="switch"
-          checked={data.config?.keepOnlySet || false}
-          onChange={(e) => onChange('keepOnlySet', e.target.checked)}
+      <ConfigField
+        label="Operation Type"
+        type="select"
+        field="operationType"
+        value={data.config?.operationType}
+        onChange={handleChange}
+        options={operationTypeOptions}
+        required
+      />
+
+      <ConfigField
+        label="Variable Path"
+        type="text"
+        field="variablePath"
+        value={data.config?.variablePath}
+        onChange={handleChange}
+        placeholder="user.profile.name"
+        required
+      />
+
+      {!['delete', 'toggle'].includes(data.config?.operationType) && (
+        <ConfigField
+          label="Value Type"
+          type="select"
+          field="valueType"
+          value={data.config?.valueType}
+          onChange={handleChange}
+          options={valueTypeOptions}
+          required
         />
-        <Form.Text className="text-muted">
-          If enabled, only set variables will be passed to the next node
-        </Form.Text>
-      </Form.Group>
+      )}
 
-      <div className="mb-3">
-        <h6>Variables</h6>
-        {variables.map((variable, index) => (
-          <div key={index} className="border p-3 mb-2 rounded">
-            <Row className="mb-2">
-              <Col>
-                <Form.Group>
-                  <Form.Label>Name</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={variable.name}
-                    onChange={(e) => updateVariable(index, 'name', e.target.value)}
-                    placeholder="Variable name"
-                  />
-                </Form.Group>
-              </Col>
-              <Col>
-                <Form.Group>
-                  <Form.Label>Type</Form.Label>
-                  <Form.Select
-                    value={variable.type}
-                    onChange={(e) => updateVariable(index, 'type', e.target.value)}
-                  >
-                    <option value="string">String</option>
-                    <option value="number">Number</option>
-                    <option value="boolean">Boolean</option>
-                    <option value="array">Array</option>
-                    <option value="object">Object</option>
-                    <option value="expression">Expression</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
+      {data.config?.valueType === 'string' && (
+        <ConfigField
+          label="String Value"
+          type="text"
+          field="stringValue"
+          value={data.config?.stringValue}
+          onChange={handleChange}
+          required
+        />
+      )}
 
-            <Form.Group className="mb-2">
-              <Form.Label>Value</Form.Label>
-              {variable.type === 'boolean' ? (
-                <Form.Select
-                  value={variable.value}
-                  onChange={(e) => updateVariable(index, 'value', e.target.value)}
-                >
-                  <option value="true">True</option>
-                  <option value="false">False</option>
-                </Form.Select>
-              ) : variable.type === 'expression' ? (
-                <Form.Control
-                  as="textarea"
-                  rows={2}
-                  value={variable.value}
-                  onChange={(e) => updateVariable(index, 'value', e.target.value)}
-                  placeholder="$input.data.field"
-                />
-              ) : (
-                <Form.Control
-                  type={variable.type === 'number' ? 'number' : 'text'}
-                  value={variable.value}
-                  onChange={(e) => updateVariable(index, 'value', e.target.value)}
-                  placeholder="Variable value"
-                />
-              )}
-            </Form.Group>
+      {data.config?.valueType === 'number' && (
+        <ConfigField
+          label="Number Value"
+          type="number"
+          field="numberValue"
+          value={data.config?.numberValue}
+          onChange={handleChange}
+          validation="number"
+          required
+        />
+      )}
 
-            <Form.Group className="mb-2">
-              <Form.Label>Scope</Form.Label>
-              <Form.Select
-                value={variable.scope}
-                onChange={(e) => updateVariable(index, 'scope', e.target.value)}
-              >
-                <option value="workflow">Workflow</option>
-                <option value="node">Node</option>
-              </Form.Select>
-            </Form.Group>
+      {data.config?.valueType === 'boolean' && (
+        <ConfigField
+          label="Boolean Value"
+          type="checkbox"
+          field="booleanValue"
+          value={data.config?.booleanValue}
+          onChange={handleChange}
+        />
+      )}
 
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => removeVariable(index)}
-            >
-              Remove Variable
-            </Button>
-          </div>
-        ))}
-      </div>
+      {data.config?.valueType === 'array' && (
+        <ConfigField
+          label="Array Value"
+          type="textarea"
+          field="arrayValue"
+          value={data.config?.arrayValue}
+          onChange={handleChange}
+          placeholder={`[
+  "item1",
+  "item2",
+  "item3"
+]`}
+          rows={4}
+          required
+        />
+      )}
 
-      <Button
-        variant="secondary"
-        onClick={addVariable}
-        className="w-100"
-      >
-        Add Variable
-      </Button>
+      {data.config?.valueType === 'object' && (
+        <ConfigField
+          label="Object Value"
+          type="textarea"
+          field="objectValue"
+          value={data.config?.objectValue}
+          onChange={handleChange}
+          placeholder={`{
+  "key1": "value1",
+  "key2": "value2"
+}`}
+          rows={4}
+          required
+        />
+      )}
+
+      {data.config?.valueType === 'expression' && (
+        <ConfigField
+          label="Expression"
+          type="textarea"
+          field="expression"
+          value={data.config?.expression}
+          onChange={handleChange}
+          placeholder={`// Use JavaScript expressions
+input.value * 2`}
+          rows={4}
+          required
+        />
+      )}
+
+      {['increment', 'decrement'].includes(data.config?.operationType) && (
+        <ConfigField
+          label="Step Value"
+          type="number"
+          field="stepValue"
+          value={data.config?.stepValue}
+          onChange={handleChange}
+          placeholder="1"
+          validation="number"
+        />
+      )}
+
+      {['append', 'prepend'].includes(data.config?.operationType) && (
+        <ConfigField
+          label="Max Array Length"
+          type="number"
+          field="maxLength"
+          value={data.config?.maxLength}
+          onChange={handleChange}
+          min={0}
+          validation="number"
+        />
+      )}
+
+      {data.config?.operationType === 'merge' && (
+        <ConfigField
+          label="Merge Strategy"
+          type="select"
+          field="mergeStrategy"
+          value={data.config?.mergeStrategy}
+          onChange={handleChange}
+          options={mergeStrategyOptions}
+          required
+        />
+      )}
+
+      <ConfigField
+        label="Create Path"
+        type="checkbox"
+        field="createPath"
+        value={data.config?.createPath}
+        onChange={handleChange}
+      />
+
+      <ConfigField
+        label="Error Handling"
+        type="select"
+        field="errorHandling"
+        value={data.config?.errorHandling}
+        onChange={handleChange}
+        options={[
+          { value: 'throw', label: 'Throw Error' },
+          { value: 'ignore', label: 'Ignore Error' },
+          { value: 'default', label: 'Use Default Value' }
+        ]}
+      />
+
+      {data.config?.errorHandling === 'default' && (
+        <ConfigField
+          label="Default Value"
+          type="textarea"
+          field="defaultValue"
+          value={data.config?.defaultValue}
+          onChange={handleChange}
+          placeholder="Default value if operation fails"
+          rows={2}
+        />
+      )}
+
+      <ConfigField
+        label="Description"
+        type="textarea"
+        field="description"
+        value={data.config?.description}
+        onChange={handleChange}
+        placeholder="Describe the purpose of this operation"
+        rows={2}
+      />
     </div>
   );
 }
