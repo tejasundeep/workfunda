@@ -23,6 +23,7 @@ import TwilioNode from './config/TwilioNode';
 import StripeNode from './config/StripeNode';
 import GitHubNode from './config/GitHubNode';
 import JiraNode from './config/JiraNode';
+import OpenAINodeConfig from './config/OpenAINode';
 
 export default function NodeConfigPanel({ nodes, setNodes, selectedNodeId }) {
   const selectedNode = useMemo(
@@ -200,6 +201,13 @@ export default function NodeConfigPanel({ nodes, setNodes, selectedNodeId }) {
         return <GitHubNode data={selectedNode.data} onChange={updateNodeConfig} />;
       case 'jira':
         return <JiraNode data={selectedNode.data} onChange={updateNodeConfig} />;
+      case 'openai':
+        return (
+          <OpenAINodeConfig
+            data={selectedNode.data}
+            onChange={updateNodeConfig}
+          />
+        );
       default:
         return <p>No configuration available for this node type.</p>;
     }

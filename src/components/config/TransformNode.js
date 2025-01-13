@@ -28,7 +28,7 @@ export default function TransformNode({ data, onChange }) {
             placeholder="item => ({ ...item, newField: item.oldField })"
           />
           <Form.Text className="text-muted">
-            Write a JavaScript arrow function that transforms each item
+            Write a JavaScript arrow function that transforms each item. Example: {'<code>item => ({ ...item, newField: item.oldField })</code>'}
           </Form.Text>
         </Form.Group>
       )}
@@ -44,7 +44,7 @@ export default function TransformNode({ data, onChange }) {
             placeholder="item => item.value > 10"
           />
           <Form.Text className="text-muted">
-            Write a JavaScript arrow function that returns true/false
+            Write a JavaScript arrow function that returns true/false. Example: <code>{'item => item.value > 10'}</code>
           </Form.Text>
         </Form.Group>
       )}

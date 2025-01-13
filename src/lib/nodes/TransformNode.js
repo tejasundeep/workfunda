@@ -24,6 +24,11 @@ export async function executeTransformNode(config, inputData) {
     } = config;
 
     try {
+        // Validate configuration
+        if (!Array.isArray(fields)) throw new Error('Invalid configuration: Fields must be an array');
+        if (typeof expression !== 'string' && expression !== undefined) throw new Error('Invalid configuration: Expression must be a string');
+        if (typeof filterCondition !== 'string' && filterCondition !== undefined) throw new Error('Invalid configuration: Filter condition must be a string');
+
         // Convert input to array if it's not already
         const items = Array.isArray(inputData) ? inputData : [inputData];
 
@@ -41,7 +46,12 @@ export async function executeTransformNode(config, inputData) {
                         } else if (type === 'expression') {
                             // Evaluate expression in a safe context
                             const evalContext = { item, value: getValueByPath(item, source) };
-                            value = new Function('item', 'value', `return ${transform}`)(evalContext.item, evalContext.value);
+                            try {
+                                value = new Function('item', 'value', `return ${transform}`)(evalContext.item, evalContext.value);
+                            } catch (error) {
+                                console.error('Error evaluating expression:', error);
+                                throw new Error(`Invalid expression in field ${target}: ${error.message}`);
+                            }
                         }
                         
                         setValueByPath(result, target, value);
@@ -55,12 +65,17 @@ export async function executeTransformNode(config, inputData) {
 
             case 'filter': {
                 if (!filterCondition) {
-                    throw new Error('Filter condition is required for filter mode');
+                    throw new Error('Invalid configuration: Filter condition is required for filter mode');
                 }
 
                 const filteredItems = items.filter(item => {
                     const evalContext = { item };
-                    return new Function('item', `return ${filterCondition}`)(evalContext.item);
+                    try {
+                        return new Function('item', `return ${filterCondition}`)(evalContext.item);
+                    } catch (error) {
+                        console.error('Error evaluating filter condition:', error);
+                        throw new Error(`Invalid filter condition: ${error.message}`);
+                    }
                 });
 
                 return returnArray ? filteredItems : filteredItems[0];
@@ -68,7 +83,7 @@ export async function executeTransformNode(config, inputData) {
 
             case 'custom': {
                 if (!expression) {
-                    throw new Error('Expression is required for custom mode');
+                    throw new Error('Invalid configuration: Expression is required for custom mode');
                 }
 
                 // Provide a safe context for custom transformations
@@ -81,8 +96,13 @@ export async function executeTransformNode(config, inputData) {
                     }
                 };
 
-                const result = new Function('items', 'helpers', expression)(context.items, context.helpers);
-                return returnArray ? (Array.isArray(result) ? result : [result]) : result;
+                try {
+                    const result = new Function('items', 'helpers', expression)(context.items, context.helpers);
+                    return returnArray ? (Array.isArray(result) ? result : [result]) : result;
+                } catch (error) {
+                    console.error('Error evaluating custom expression:', error);
+                    throw new Error(`Invalid custom expression: ${error.message}`);
+                }
             }
 
             default:

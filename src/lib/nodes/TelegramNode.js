@@ -19,7 +19,9 @@ export async function executeTelegramNode(nodeConfig, credentials) {
 
     const result = await response.json();
     if (!result.ok) {
-        throw new Error(`Telegram error: ${result.description}`);
+        const errorMessage = `Telegram error: ${result.description}`;
+        console.error(errorMessage);
+        throw new Error(errorMessage);
     }
     return result;
 }

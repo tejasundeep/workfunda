@@ -20,7 +20,8 @@ import {
   FaCloud,
   FaPhone,
   FaCreditCard,
-  FaGithub
+  FaGithub,
+  FaBrain
 } from 'react-icons/fa';
 
 export default function Sidebar() {
@@ -81,6 +82,7 @@ export default function Sidebar() {
       { label: 'Issue Updated', type: 'jira_issue_updated' },
       { label: 'Comment Added', type: 'jira_comment_added' }
     ] },
+    { label: 'OpenAI', type: 'openai', icon: <FaBrain /> },
   ];
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -106,9 +108,9 @@ export default function Sidebar() {
   );
 
   const categories = {
-    Triggers: ['Trigger', 'Webhook', 'Scheduler', 'Email', 'Google Cloud', 'Azure', 'Twilio', 'Stripe', 'Slack', 'Jira'],
-    Actions: ['HTTP Request', 'Function', 'Set', 'Transform', 'Compare', 'Switch', 'Split', 'Merge'],
-    Integrations: ['Slack', 'Telegram', 'MySQL', 'AWS', 'GitHub', 'Jira']
+    'Workflow Triggers': ['Trigger', 'Webhook', 'Scheduler', 'Email', 'Google Cloud', 'Azure', 'Twilio', 'Stripe', 'Slack', 'Jira'],
+    'Data Operations': ['HTTP Request', 'Function', 'Set', 'Transform', 'Compare', 'Switch', 'Split', 'Merge'],
+    'External Integrations': ['Slack', 'Telegram Message', 'MySQL', 'AWS', 'GitHub', 'Jira', 'OpenAI']
   };
 
   const onDragStart = (event, nodeType) => {
@@ -117,11 +119,11 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="bg-secondary text-light p-2" style={{ minWidth: '200px' }}>
-      <h4 className="mb-3">Nodes</h4>
+    <div className="bg-secondary text-light p-2" style={{ minWidth: '250px', maxHeight: '100vh', overflowY: 'auto' }}>
+      <h4 className="mb-3">Node Library</h4>
       <input
         type="text"
-        placeholder="Search..."
+        placeholder="Search nodes..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className="form-control mb-3"
