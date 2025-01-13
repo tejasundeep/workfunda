@@ -6,59 +6,53 @@ export default function DatabaseNode({ data, onChange }) {
     onChange(field, value);
   };
 
-  const databaseTypeOptions = [
-    { value: 'postgresql', label: 'PostgreSQL' },
+  const dbTypeOptions = [
     { value: 'mysql', label: 'MySQL' },
+    { value: 'postgresql', label: 'PostgreSQL' },
     { value: 'mongodb', label: 'MongoDB' },
     { value: 'redis', label: 'Redis' },
-    { value: 'elasticsearch', label: 'Elasticsearch' },
     { value: 'sqlite', label: 'SQLite' },
     { value: 'mssql', label: 'Microsoft SQL Server' },
-    { value: 'oracle', label: 'Oracle' }
+    { value: 'oracle', label: 'Oracle' },
+    { value: 'cassandra', label: 'Cassandra' }
   ];
 
-  const operationTypeOptions = [
-    { value: 'query', label: 'Query' },
-    { value: 'insert', label: 'Insert' },
-    { value: 'update', label: 'Update' },
-    { value: 'delete', label: 'Delete' },
-    { value: 'bulk', label: 'Bulk Operation' },
-    { value: 'transaction', label: 'Transaction' },
-    { value: 'aggregate', label: 'Aggregate' }
+  const poolingOptions = [
+    { value: 'fixed', label: 'Fixed Size' },
+    { value: 'dynamic', label: 'Dynamic' },
+    { value: 'adaptive', label: 'Adaptive' }
   ];
 
-  const indexTypeOptions = [
-    { value: 'btree', label: 'B-Tree' },
-    { value: 'hash', label: 'Hash' },
-    { value: 'gist', label: 'GiST' },
-    { value: 'gin', label: 'GIN' },
-    { value: 'brin', label: 'BRIN' }
+  const sslModeOptions = [
+    { value: 'disable', label: 'Disable' },
+    { value: 'prefer', label: 'Prefer' },
+    { value: 'require', label: 'Require' },
+    { value: 'verify-ca', label: 'Verify CA' },
+    { value: 'verify-full', label: 'Verify Full' }
   ];
 
   return (
     <div>
       <ConfigField
-        label="Database Type"
-        type="select"
-        field="databaseType"
-        value={data.config?.databaseType}
+        label="Enable Database"
+        type="switch"
+        field="enabled"
+        value={data.config?.enabled}
         onChange={handleChange}
-        options={databaseTypeOptions}
-        required
       />
 
-      <ConfigField
-        label="Operation Type"
-        type="select"
-        field="operationType"
-        value={data.config?.operationType}
-        onChange={handleChange}
-        options={operationTypeOptions}
-        required
-      />
-
-      {data.config?.databaseType !== 'sqlite' && (
+      {data.config?.enabled && (
         <>
+          <ConfigField
+            label="Database Type"
+            type="select"
+            field="dbType"
+            value={data.config?.dbType}
+            onChange={handleChange}
+            options={dbTypeOptions}
+            required
+          />
+
           <ConfigField
             label="Host"
             type="text"
@@ -68,6 +62,7 @@ export default function DatabaseNode({ data, onChange }) {
             placeholder="localhost"
             required
           />
+
           <ConfigField
             label="Port"
             type="number"
@@ -79,6 +74,7 @@ export default function DatabaseNode({ data, onChange }) {
             validation="number"
             required
           />
+
           <ConfigField
             label="Database Name"
             type="text"
@@ -87,6 +83,7 @@ export default function DatabaseNode({ data, onChange }) {
             onChange={handleChange}
             required
           />
+
           <ConfigField
             label="Username"
             type="text"
@@ -95,449 +92,285 @@ export default function DatabaseNode({ data, onChange }) {
             onChange={handleChange}
             required
           />
+
           <ConfigField
             label="Password"
             type="password"
             field="password"
             value={data.config?.password}
             onChange={handleChange}
-            secure
             required
           />
-        </>
-      )}
 
-      {data.config?.databaseType === 'sqlite' && (
-        <ConfigField
-          label="Database Path"
-          type="text"
-          field="databasePath"
-          value={data.config?.databasePath}
-          onChange={handleChange}
-          placeholder="/path/to/database.sqlite"
-          required
-        />
-      )}
-
-      {['postgresql', 'mysql', 'mssql', 'oracle'].includes(data.config?.databaseType) && (
-        <>
           <ConfigField
-            label="Schema"
-            type="text"
-            field="schema"
-            value={data.config?.schema}
+            label="Enable Connection Pooling"
+            type="switch"
+            field="enablePooling"
+            value={data.config?.enablePooling}
             onChange={handleChange}
-            placeholder="public"
           />
+
+          {data.config?.enablePooling && (
+            <>
+              <ConfigField
+                label="Pool Type"
+                type="select"
+                field="poolType"
+                value={data.config?.poolType}
+                onChange={handleChange}
+                options={poolingOptions}
+                required
+              />
+              <ConfigField
+                label="Min Pool Size"
+                type="number"
+                field="minPoolSize"
+                value={data.config?.minPoolSize}
+                onChange={handleChange}
+                min={1}
+                validation="number"
+                required
+              />
+              <ConfigField
+                label="Max Pool Size"
+                type="number"
+                field="maxPoolSize"
+                value={data.config?.maxPoolSize}
+                onChange={handleChange}
+                min={1}
+                validation="number"
+                required
+              />
+              <ConfigField
+                label="Connection Timeout (ms)"
+                type="number"
+                field="connectionTimeout"
+                value={data.config?.connectionTimeout}
+                onChange={handleChange}
+                min={100}
+                validation="number"
+                required
+              />
+              <ConfigField
+                label="Idle Timeout (ms)"
+                type="number"
+                field="idleTimeout"
+                value={data.config?.idleTimeout}
+                onChange={handleChange}
+                min={1000}
+                validation="number"
+                required
+              />
+            </>
+          )}
+
           <ConfigField
-            label="SSL Mode"
+            label="Enable SSL"
+            type="switch"
+            field="enableSsl"
+            value={data.config?.enableSsl}
+            onChange={handleChange}
+          />
+
+          {data.config?.enableSsl && (
+            <>
+              <ConfigField
+                label="SSL Mode"
+                type="select"
+                field="sslMode"
+                value={data.config?.sslMode}
+                onChange={handleChange}
+                options={sslModeOptions}
+                required
+              />
+              <ConfigField
+                label="CA Certificate"
+                type="textarea"
+                field="caCert"
+                value={data.config?.caCert}
+                onChange={handleChange}
+                placeholder="-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
+                rows={6}
+              />
+              <ConfigField
+                label="Client Certificate"
+                type="textarea"
+                field="clientCert"
+                value={data.config?.clientCert}
+                onChange={handleChange}
+                placeholder="-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
+                rows={6}
+              />
+              <ConfigField
+                label="Client Key"
+                type="textarea"
+                field="clientKey"
+                value={data.config?.clientKey}
+                onChange={handleChange}
+                placeholder="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+                rows={6}
+              />
+            </>
+          )}
+
+          <ConfigField
+            label="Enable Query Logging"
+            type="switch"
+            field="enableQueryLogging"
+            value={data.config?.enableQueryLogging}
+            onChange={handleChange}
+          />
+
+          {data.config?.enableQueryLogging && (
+            <>
+              <ConfigField
+                label="Log Level"
+                type="select"
+                field="logLevel"
+                value={data.config?.logLevel}
+                onChange={handleChange}
+                options={[
+                  { value: 'debug', label: 'Debug' },
+                  { value: 'info', label: 'Info' },
+                  { value: 'warn', label: 'Warning' },
+                  { value: 'error', label: 'Error' }
+                ]}
+                required
+              />
+              <ConfigField
+                label="Log Slow Queries"
+                type="switch"
+                field="logSlowQueries"
+                value={data.config?.logSlowQueries}
+                onChange={handleChange}
+              />
+              {data.config?.logSlowQueries && (
+                <ConfigField
+                  label="Slow Query Threshold (ms)"
+                  type="number"
+                  field="slowQueryThreshold"
+                  value={data.config?.slowQueryThreshold}
+                  onChange={handleChange}
+                  min={100}
+                  validation="number"
+                  required
+                />
+              )}
+            </>
+          )}
+
+          <ConfigField
+            label="Enable Query Cache"
+            type="switch"
+            field="enableQueryCache"
+            value={data.config?.enableQueryCache}
+            onChange={handleChange}
+          />
+
+          {data.config?.enableQueryCache && (
+            <>
+              <ConfigField
+                label="Cache Size (MB)"
+                type="number"
+                field="cacheSize"
+                value={data.config?.cacheSize}
+                onChange={handleChange}
+                min={1}
+                validation="number"
+                required
+              />
+              <ConfigField
+                label="Cache TTL (seconds)"
+                type="number"
+                field="cacheTtl"
+                value={data.config?.cacheTtl}
+                onChange={handleChange}
+                min={1}
+                validation="number"
+                required
+              />
+            </>
+          )}
+
+          <ConfigField
+            label="Enable Migrations"
+            type="switch"
+            field="enableMigrations"
+            value={data.config?.enableMigrations}
+            onChange={handleChange}
+          />
+
+          {data.config?.enableMigrations && (
+            <>
+              <ConfigField
+                label="Migrations Directory"
+                type="text"
+                field="migrationsDir"
+                value={data.config?.migrationsDir}
+                onChange={handleChange}
+                placeholder="./migrations"
+                required
+              />
+              <ConfigField
+                label="Auto Run Migrations"
+                type="switch"
+                field="autoRunMigrations"
+                value={data.config?.autoRunMigrations}
+                onChange={handleChange}
+              />
+            </>
+          )}
+
+          <ConfigField
+            label="Error Handling"
             type="select"
-            field="sslMode"
-            value={data.config?.sslMode}
+            field="errorHandling"
+            value={data.config?.errorHandling}
             onChange={handleChange}
             options={[
-              { value: 'disable', label: 'Disable' },
-              { value: 'require', label: 'Require' },
-              { value: 'verify-ca', label: 'Verify CA' },
-              { value: 'verify-full', label: 'Verify Full' }
+              { value: 'throw', label: 'Throw Error' },
+              { value: 'retry', label: 'Retry Operation' },
+              { value: 'fallback', label: 'Use Fallback' },
+              { value: 'ignore', label: 'Ignore Error' }
             ]}
           />
-        </>
-      )}
 
-      {data.config?.operationType === 'query' && (
-        <>
+          {data.config?.errorHandling === 'retry' && (
+            <>
+              <ConfigField
+                label="Max Retries"
+                type="number"
+                field="maxRetries"
+                value={data.config?.maxRetries}
+                onChange={handleChange}
+                min={1}
+                validation="number"
+                required
+              />
+              <ConfigField
+                label="Retry Interval (ms)"
+                type="number"
+                field="retryInterval"
+                value={data.config?.retryInterval}
+                onChange={handleChange}
+                min={100}
+                validation="number"
+                required
+              />
+            </>
+          )}
+
           <ConfigField
-            label="Query"
+            label="Description"
             type="textarea"
-            field="query"
-            value={data.config?.query}
+            field="description"
+            value={data.config?.description}
             onChange={handleChange}
-            placeholder="SELECT * FROM table WHERE condition"
-            rows={4}
-            required
-          />
-          <ConfigField
-            label="Parameters"
-            type="textarea"
-            field="parameters"
-            value={data.config?.parameters}
-            onChange={handleChange}
-            placeholder={`[
-  "param1",
-  "param2"
-]`}
-            rows={4}
+            placeholder="Describe the purpose of this database connection"
+            rows={3}
           />
         </>
       )}
-
-      {data.config?.operationType === 'insert' && (
-        <>
-          <ConfigField
-            label="Table Name"
-            type="text"
-            field="tableName"
-            value={data.config?.tableName}
-            onChange={handleChange}
-            required
-          />
-          <ConfigField
-            label="Data"
-            type="textarea"
-            field="data"
-            value={data.config?.data}
-            onChange={handleChange}
-            placeholder={`{
-  "column1": "value1",
-  "column2": "value2"
-}`}
-            rows={6}
-            required
-          />
-        </>
-      )}
-
-      {data.config?.operationType === 'update' && (
-        <>
-          <ConfigField
-            label="Table Name"
-            type="text"
-            field="tableName"
-            value={data.config?.tableName}
-            onChange={handleChange}
-            required
-          />
-          <ConfigField
-            label="Set Values"
-            type="textarea"
-            field="setValues"
-            value={data.config?.setValues}
-            onChange={handleChange}
-            placeholder={`{
-  "column1": "newValue1",
-  "column2": "newValue2"
-}`}
-            rows={6}
-            required
-          />
-          <ConfigField
-            label="Where Condition"
-            type="textarea"
-            field="whereCondition"
-            value={data.config?.whereCondition}
-            onChange={handleChange}
-            placeholder={`{
-  "id": 1
-}`}
-            rows={4}
-            required
-          />
-        </>
-      )}
-
-      {data.config?.operationType === 'delete' && (
-        <>
-          <ConfigField
-            label="Table Name"
-            type="text"
-            field="tableName"
-            value={data.config?.tableName}
-            onChange={handleChange}
-            required
-          />
-          <ConfigField
-            label="Where Condition"
-            type="textarea"
-            field="whereCondition"
-            value={data.config?.whereCondition}
-            onChange={handleChange}
-            placeholder={`{
-  "id": 1
-}`}
-            rows={4}
-            required
-          />
-        </>
-      )}
-
-      {data.config?.operationType === 'bulk' && (
-        <>
-          <ConfigField
-            label="Table Name"
-            type="text"
-            field="tableName"
-            value={data.config?.tableName}
-            onChange={handleChange}
-            required
-          />
-          <ConfigField
-            label="Bulk Operation Type"
-            type="select"
-            field="bulkOperationType"
-            value={data.config?.bulkOperationType}
-            onChange={handleChange}
-            options={[
-              { value: 'insert', label: 'Bulk Insert' },
-              { value: 'update', label: 'Bulk Update' },
-              { value: 'delete', label: 'Bulk Delete' }
-            ]}
-            required
-          />
-          <ConfigField
-            label="Batch Size"
-            type="number"
-            field="batchSize"
-            value={data.config?.batchSize}
-            onChange={handleChange}
-            min={1}
-            validation="number"
-            required
-          />
-          <ConfigField
-            label="Data"
-            type="textarea"
-            field="data"
-            value={data.config?.data}
-            onChange={handleChange}
-            placeholder={`[
-  {
-    "column1": "value1",
-    "column2": "value2"
-  }
-]`}
-            rows={8}
-            required
-          />
-        </>
-      )}
-
-      {data.config?.operationType === 'transaction' && (
-        <>
-          <ConfigField
-            label="Transaction Queries"
-            type="textarea"
-            field="transactionQueries"
-            value={data.config?.transactionQueries}
-            onChange={handleChange}
-            placeholder={`[
-  {
-    "query": "INSERT INTO table1 VALUES ($1, $2)",
-    "parameters": ["value1", "value2"]
-  },
-  {
-    "query": "UPDATE table2 SET column = $1",
-    "parameters": ["newValue"]
-  }
-]`}
-            rows={10}
-            required
-          />
-          <ConfigField
-            label="Isolation Level"
-            type="select"
-            field="isolationLevel"
-            value={data.config?.isolationLevel}
-            onChange={handleChange}
-            options={[
-              { value: 'read_uncommitted', label: 'Read Uncommitted' },
-              { value: 'read_committed', label: 'Read Committed' },
-              { value: 'repeatable_read', label: 'Repeatable Read' },
-              { value: 'serializable', label: 'Serializable' }
-            ]}
-          />
-        </>
-      )}
-
-      {data.config?.operationType === 'aggregate' && (
-        <>
-          <ConfigField
-            label="Collection/Table"
-            type="text"
-            field="collection"
-            value={data.config?.collection}
-            onChange={handleChange}
-            required
-          />
-          <ConfigField
-            label="Pipeline"
-            type="textarea"
-            field="pipeline"
-            value={data.config?.pipeline}
-            onChange={handleChange}
-            placeholder={`[
-  {
-    "$match": { "status": "active" }
-  },
-  {
-    "$group": {
-      "_id": "$category",
-      "total": { "$sum": "$amount" }
-    }
-  }
-]`}
-            rows={10}
-            required
-          />
-        </>
-      )}
-
-      <ConfigField
-        label="Enable Connection Pool"
-        type="checkbox"
-        field="enablePool"
-        value={data.config?.enablePool}
-        onChange={handleChange}
-      />
-
-      {data.config?.enablePool && (
-        <>
-          <ConfigField
-            label="Min Pool Size"
-            type="number"
-            field="minPoolSize"
-            value={data.config?.minPoolSize}
-            onChange={handleChange}
-            min={1}
-            validation="number"
-            required
-          />
-          <ConfigField
-            label="Max Pool Size"
-            type="number"
-            field="maxPoolSize"
-            value={data.config?.maxPoolSize}
-            onChange={handleChange}
-            min={1}
-            validation="number"
-            required
-          />
-          <ConfigField
-            label="Idle Timeout (ms)"
-            type="number"
-            field="idleTimeout"
-            value={data.config?.idleTimeout}
-            onChange={handleChange}
-            min={0}
-            validation="number"
-          />
-        </>
-      )}
-
-      <ConfigField
-        label="Enable Indexing"
-        type="checkbox"
-        field="enableIndexing"
-        value={data.config?.enableIndexing}
-        onChange={handleChange}
-      />
-
-      {data.config?.enableIndexing && (
-        <>
-          <ConfigField
-            label="Index Type"
-            type="select"
-            field="indexType"
-            value={data.config?.indexType}
-            onChange={handleChange}
-            options={indexTypeOptions}
-            required
-          />
-          <ConfigField
-            label="Index Fields"
-            type="textarea"
-            field="indexFields"
-            value={data.config?.indexFields}
-            onChange={handleChange}
-            placeholder={`[
-  {
-    "field": "column1",
-    "order": "ASC"
-  }
-]`}
-            rows={6}
-            required
-          />
-        </>
-      )}
-
-      <ConfigField
-        label="Enable Caching"
-        type="checkbox"
-        field="enableCaching"
-        value={data.config?.enableCaching}
-        onChange={handleChange}
-      />
-
-      {data.config?.enableCaching && (
-        <>
-          <ConfigField
-            label="Cache TTL (seconds)"
-            type="number"
-            field="cacheTTL"
-            value={data.config?.cacheTTL}
-            onChange={handleChange}
-            min={0}
-            validation="number"
-            required
-          />
-          <ConfigField
-            label="Cache Key Prefix"
-            type="text"
-            field="cacheKeyPrefix"
-            value={data.config?.cacheKeyPrefix}
-            onChange={handleChange}
-          />
-        </>
-      )}
-
-      <ConfigField
-        label="Error Handling"
-        type="select"
-        field="errorHandling"
-        value={data.config?.errorHandling}
-        onChange={handleChange}
-        options={[
-          { value: 'throw', label: 'Throw Error' },
-          { value: 'retry', label: 'Retry Operation' },
-          { value: 'ignore', label: 'Ignore Error' }
-        ]}
-      />
-
-      {data.config?.errorHandling === 'retry' && (
-        <>
-          <ConfigField
-            label="Retry Count"
-            type="number"
-            field="retryCount"
-            value={data.config?.retryCount}
-            onChange={handleChange}
-            min={1}
-            max={5}
-            validation="number"
-          />
-          <ConfigField
-            label="Retry Delay (ms)"
-            type="number"
-            field="retryDelay"
-            value={data.config?.retryDelay}
-            onChange={handleChange}
-            min={0}
-            max={60000}
-            validation="number"
-          />
-        </>
-      )}
-
-      <ConfigField
-        label="Description"
-        type="textarea"
-        field="description"
-        value={data.config?.description}
-        onChange={handleChange}
-        placeholder="Describe the purpose of this database operation"
-        rows={2}
-      />
     </div>
   );
 }

@@ -4,6 +4,8 @@ import ReactFlow, {
   Background,
   BackgroundVariant,
   Controls,
+  applyNodeChanges,
+  applyEdgeChanges
 } from "react-flow-renderer";
 import { useSelector, useDispatch } from 'react-redux';
 import { 
@@ -86,22 +88,21 @@ export default function Builder() {
     dispatch(addNode(newNode));
   };
 
-  const onNodesChange = useCallback((changes) => {
-    if (!Array.isArray(changes)) return;
-    const updatedNodes = [...nodes];
-    changes.forEach(change => {
-      const nodeIndex = updatedNodes.findIndex(node => node.id === change.id);
-      if (nodeIndex !== -1 && change.type === 'position') {
-        updatedNodes[nodeIndex] = { ...updatedNodes[nodeIndex], position: change.position };
-      }
-    });
-    dispatch(setNodes(updatedNodes));
-  }, [nodes, dispatch]);
+  const onNodesChange = useCallback(
+    (changes) => {
+      const updatedNodes = applyNodeChanges(changes, nodes);
+      dispatch(setNodes(updatedNodes));
+    },
+    [nodes, dispatch]
+  );
 
-  const onEdgesChange = useCallback((changes) => {
-    if (!Array.isArray(changes)) return;
-    dispatch(setEdges(changes));
-  }, [dispatch]);
+  const onEdgesChange = useCallback(
+    (changes) => {
+      const updatedEdges = applyEdgeChanges(changes, edges);
+      dispatch(setEdges(updatedEdges));
+    },
+    [edges, dispatch]
+  );
 
   const handleNodeClick = (event, node) => {
     dispatch(setSelectedNodeId(node.id));

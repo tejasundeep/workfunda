@@ -7,24 +7,21 @@ export default function AuthenticationNode({ data, onChange }) {
   };
 
   const authTypeOptions = [
-    { value: 'basic', label: 'Basic Auth' },
     { value: 'jwt', label: 'JWT' },
     { value: 'oauth2', label: 'OAuth 2.0' },
-    { value: 'apiKey', label: 'API Key' },
-    { value: 'ldap', label: 'LDAP' },
-    { value: 'saml', label: 'SAML' },
+    { value: 'basic', label: 'Basic Auth' },
+    { value: 'apikey', label: 'API Key' },
     { value: 'custom', label: 'Custom Auth' }
   ];
 
-  const oauth2GrantTypes = [
+  const oauth2GrantOptions = [
     { value: 'authorization_code', label: 'Authorization Code' },
     { value: 'client_credentials', label: 'Client Credentials' },
     { value: 'password', label: 'Password' },
-    { value: 'implicit', label: 'Implicit' },
-    { value: 'refresh_token', label: 'Refresh Token' }
+    { value: 'implicit', label: 'Implicit' }
   ];
 
-  const apiKeyLocations = [
+  const apiKeyLocationOptions = [
     { value: 'header', label: 'Header' },
     { value: 'query', label: 'Query Parameter' },
     { value: 'cookie', label: 'Cookie' }
@@ -33,457 +30,368 @@ export default function AuthenticationNode({ data, onChange }) {
   return (
     <div>
       <ConfigField
-        label="Authentication Type"
-        type="select"
-        field="authType"
-        value={data.config?.authType}
+        label="Enable Authentication"
+        type="switch"
+        field="enabled"
+        value={data.config?.enabled}
         onChange={handleChange}
-        options={authTypeOptions}
-        required
       />
 
-      {data.config?.authType === 'basic' && (
+      {data.config?.enabled && (
         <>
           <ConfigField
-            label="Username"
-            type="text"
-            field="username"
-            value={data.config?.username}
-            onChange={handleChange}
-            required
-          />
-          <ConfigField
-            label="Password"
-            type="password"
-            field="password"
-            value={data.config?.password}
-            onChange={handleChange}
-            secure
-            required
-          />
-          <ConfigField
-            label="Realm"
-            type="text"
-            field="realm"
-            value={data.config?.realm}
-            onChange={handleChange}
-          />
-        </>
-      )}
-
-      {data.config?.authType === 'jwt' && (
-        <>
-          <ConfigField
-            label="Secret Key"
-            type="password"
-            field="secretKey"
-            value={data.config?.secretKey}
-            onChange={handleChange}
-            secure
-            required
-          />
-          <ConfigField
-            label="Algorithm"
+            label="Authentication Type"
             type="select"
-            field="algorithm"
-            value={data.config?.algorithm}
+            field="authType"
+            value={data.config?.authType}
             onChange={handleChange}
-            options={[
-              { value: 'HS256', label: 'HS256' },
-              { value: 'HS384', label: 'HS384' },
-              { value: 'HS512', label: 'HS512' },
-              { value: 'RS256', label: 'RS256' },
-              { value: 'RS384', label: 'RS384' },
-              { value: 'RS512', label: 'RS512' }
-            ]}
+            options={authTypeOptions}
             required
           />
-          <ConfigField
-            label="Token Expiry (seconds)"
-            type="number"
-            field="expiryTime"
-            value={data.config?.expiryTime}
-            onChange={handleChange}
-            min={0}
-            validation="number"
-            required
-          />
-          <ConfigField
-            label="Issuer"
-            type="text"
-            field="issuer"
-            value={data.config?.issuer}
-            onChange={handleChange}
-          />
-          <ConfigField
-            label="Audience"
-            type="text"
-            field="audience"
-            value={data.config?.audience}
-            onChange={handleChange}
-          />
-          <ConfigField
-            label="Custom Claims"
-            type="textarea"
-            field="customClaims"
-            value={data.config?.customClaims}
-            onChange={handleChange}
-            placeholder={`{
-  "role": "admin",
-  "permissions": ["read", "write"]
+
+          {data.config?.authType === 'jwt' && (
+            <>
+              <ConfigField
+                label="Secret Key"
+                type="password"
+                field="secretKey"
+                value={data.config?.secretKey}
+                onChange={handleChange}
+                required
+              />
+              <ConfigField
+                label="Token Expiry (seconds)"
+                type="number"
+                field="tokenExpiry"
+                value={data.config?.tokenExpiry}
+                onChange={handleChange}
+                min={1}
+                validation="number"
+                required
+              />
+              <ConfigField
+                label="Enable Refresh Token"
+                type="switch"
+                field="enableRefreshToken"
+                value={data.config?.enableRefreshToken}
+                onChange={handleChange}
+              />
+              {data.config?.enableRefreshToken && (
+                <ConfigField
+                  label="Refresh Token Expiry (seconds)"
+                  type="number"
+                  field="refreshTokenExpiry"
+                  value={data.config?.refreshTokenExpiry}
+                  onChange={handleChange}
+                  min={1}
+                  validation="number"
+                  required
+                />
+              )}
+              <ConfigField
+                label="Include Claims"
+                type="switch"
+                field="includeClaims"
+                value={data.config?.includeClaims}
+                onChange={handleChange}
+              />
+              {data.config?.includeClaims && (
+                <ConfigField
+                  label="Claims"
+                  type="textarea"
+                  field="claims"
+                  value={data.config?.claims}
+                  onChange={handleChange}
+                  placeholder={`{
+  "iss": "example.com",
+  "aud": "api.example.com",
+  "roles": ["user", "admin"]
 }`}
-            rows={4}
-          />
-        </>
-      )}
+                  rows={6}
+                  required
+                />
+              )}
+            </>
+          )}
 
-      {data.config?.authType === 'oauth2' && (
-        <>
-          <ConfigField
-            label="Grant Type"
-            type="select"
-            field="grantType"
-            value={data.config?.grantType}
-            onChange={handleChange}
-            options={oauth2GrantTypes}
-            required
-          />
-          <ConfigField
-            label="Authorization URL"
-            type="text"
-            field="authorizationUrl"
-            value={data.config?.authorizationUrl}
-            onChange={handleChange}
-            placeholder="https://auth.example.com/authorize"
-            required
-          />
-          <ConfigField
-            label="Token URL"
-            type="text"
-            field="tokenUrl"
-            value={data.config?.tokenUrl}
-            onChange={handleChange}
-            placeholder="https://auth.example.com/token"
-            required
-          />
-          <ConfigField
-            label="Client ID"
-            type="text"
-            field="clientId"
-            value={data.config?.clientId}
-            onChange={handleChange}
-            required
-          />
-          <ConfigField
-            label="Client Secret"
-            type="password"
-            field="clientSecret"
-            value={data.config?.clientSecret}
-            onChange={handleChange}
-            secure
-            required
-          />
-          <ConfigField
-            label="Scope"
-            type="text"
-            field="scope"
-            value={data.config?.scope}
-            onChange={handleChange}
-            placeholder="read write"
-          />
-          <ConfigField
-            label="Redirect URI"
-            type="text"
-            field="redirectUri"
-            value={data.config?.redirectUri}
-            onChange={handleChange}
-            placeholder="https://app.example.com/callback"
-          />
-        </>
-      )}
+          {data.config?.authType === 'oauth2' && (
+            <>
+              <ConfigField
+                label="Grant Type"
+                type="select"
+                field="grantType"
+                value={data.config?.grantType}
+                onChange={handleChange}
+                options={oauth2GrantOptions}
+                required
+              />
+              <ConfigField
+                label="Client ID"
+                type="text"
+                field="clientId"
+                value={data.config?.clientId}
+                onChange={handleChange}
+                required
+              />
+              <ConfigField
+                label="Client Secret"
+                type="password"
+                field="clientSecret"
+                value={data.config?.clientSecret}
+                onChange={handleChange}
+                required
+              />
+              <ConfigField
+                label="Authorization URL"
+                type="text"
+                field="authUrl"
+                value={data.config?.authUrl}
+                onChange={handleChange}
+                placeholder="https://auth.example.com/authorize"
+                validation="url"
+                required
+              />
+              <ConfigField
+                label="Token URL"
+                type="text"
+                field="tokenUrl"
+                value={data.config?.tokenUrl}
+                onChange={handleChange}
+                placeholder="https://auth.example.com/token"
+                validation="url"
+                required
+              />
+              <ConfigField
+                label="Scope"
+                type="text"
+                field="scope"
+                value={data.config?.scope}
+                onChange={handleChange}
+                placeholder="read write"
+              />
+              <ConfigField
+                label="Enable PKCE"
+                type="switch"
+                field="enablePkce"
+                value={data.config?.enablePkce}
+                onChange={handleChange}
+              />
+            </>
+          )}
 
-      {data.config?.authType === 'apiKey' && (
-        <>
-          <ConfigField
-            label="API Key Name"
-            type="text"
-            field="apiKeyName"
-            value={data.config?.apiKeyName}
-            onChange={handleChange}
-            placeholder="X-API-Key"
-            required
-          />
-          <ConfigField
-            label="API Key Value"
-            type="password"
-            field="apiKeyValue"
-            value={data.config?.apiKeyValue}
-            onChange={handleChange}
-            secure
-            required
-          />
-          <ConfigField
-            label="API Key Location"
-            type="select"
-            field="apiKeyLocation"
-            value={data.config?.apiKeyLocation}
-            onChange={handleChange}
-            options={apiKeyLocations}
-            required
-          />
-        </>
-      )}
+          {data.config?.authType === 'basic' && (
+            <>
+              <ConfigField
+                label="Username Field"
+                type="text"
+                field="usernameField"
+                value={data.config?.usernameField}
+                onChange={handleChange}
+                placeholder="username"
+                required
+              />
+              <ConfigField
+                label="Password Field"
+                type="text"
+                field="passwordField"
+                value={data.config?.passwordField}
+                onChange={handleChange}
+                placeholder="password"
+                required
+              />
+              <ConfigField
+                label="Enable Hashing"
+                type="switch"
+                field="enableHashing"
+                value={data.config?.enableHashing}
+                onChange={handleChange}
+              />
+              {data.config?.enableHashing && (
+                <ConfigField
+                  label="Hash Algorithm"
+                  type="select"
+                  field="hashAlgorithm"
+                  value={data.config?.hashAlgorithm}
+                  onChange={handleChange}
+                  options={[
+                    { value: 'bcrypt', label: 'BCrypt' },
+                    { value: 'argon2', label: 'Argon2' },
+                    { value: 'pbkdf2', label: 'PBKDF2' }
+                  ]}
+                  required
+                />
+              )}
+            </>
+          )}
 
-      {data.config?.authType === 'ldap' && (
-        <>
-          <ConfigField
-            label="LDAP URL"
-            type="text"
-            field="ldapUrl"
-            value={data.config?.ldapUrl}
-            onChange={handleChange}
-            placeholder="ldap://ldap.example.com:389"
-            required
-          />
-          <ConfigField
-            label="Bind DN"
-            type="text"
-            field="bindDn"
-            value={data.config?.bindDn}
-            onChange={handleChange}
-            placeholder="cn=admin,dc=example,dc=com"
-            required
-          />
-          <ConfigField
-            label="Bind Password"
-            type="password"
-            field="bindPassword"
-            value={data.config?.bindPassword}
-            onChange={handleChange}
-            secure
-            required
-          />
-          <ConfigField
-            label="Search Base"
-            type="text"
-            field="searchBase"
-            value={data.config?.searchBase}
-            onChange={handleChange}
-            placeholder="dc=example,dc=com"
-            required
-          />
-          <ConfigField
-            label="Search Filter"
-            type="text"
-            field="searchFilter"
-            value={data.config?.searchFilter}
-            onChange={handleChange}
-            placeholder="(uid={{username}})"
-            required
-          />
-        </>
-      )}
+          {data.config?.authType === 'apikey' && (
+            <>
+              <ConfigField
+                label="Key Name"
+                type="text"
+                field="keyName"
+                value={data.config?.keyName}
+                onChange={handleChange}
+                placeholder="X-API-Key"
+                required
+              />
+              <ConfigField
+                label="Key Location"
+                type="select"
+                field="keyLocation"
+                value={data.config?.keyLocation}
+                onChange={handleChange}
+                options={apiKeyLocationOptions}
+                required
+              />
+              <ConfigField
+                label="Enable Key Rotation"
+                type="switch"
+                field="enableKeyRotation"
+                value={data.config?.enableKeyRotation}
+                onChange={handleChange}
+              />
+              {data.config?.enableKeyRotation && (
+                <ConfigField
+                  label="Rotation Interval (days)"
+                  type="number"
+                  field="rotationInterval"
+                  value={data.config?.rotationInterval}
+                  onChange={handleChange}
+                  min={1}
+                  validation="number"
+                  required
+                />
+              )}
+            </>
+          )}
 
-      {data.config?.authType === 'saml' && (
-        <>
-          <ConfigField
-            label="Identity Provider URL"
-            type="text"
-            field="idpUrl"
-            value={data.config?.idpUrl}
-            onChange={handleChange}
-            placeholder="https://idp.example.com/saml2/sso"
-            required
-          />
-          <ConfigField
-            label="Identity Provider Certificate"
-            type="textarea"
-            field="idpCertificate"
-            value={data.config?.idpCertificate}
-            onChange={handleChange}
-            placeholder="-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"
-            rows={6}
-            required
-          />
-          <ConfigField
-            label="Service Provider Entity ID"
-            type="text"
-            field="spEntityId"
-            value={data.config?.spEntityId}
-            onChange={handleChange}
-            placeholder="https://app.example.com"
-            required
-          />
-          <ConfigField
-            label="Assertion Consumer Service URL"
-            type="text"
-            field="acsUrl"
-            value={data.config?.acsUrl}
-            onChange={handleChange}
-            placeholder="https://app.example.com/saml/acs"
-            required
-          />
-          <ConfigField
-            label="Private Key"
-            type="textarea"
-            field="privateKey"
-            value={data.config?.privateKey}
-            onChange={handleChange}
-            placeholder="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
-            rows={6}
-            secure
-            required
-          />
-        </>
-      )}
-
-      {data.config?.authType === 'custom' && (
-        <ConfigField
-          label="Custom Authentication Logic"
-          type="textarea"
-          field="customAuth"
-          value={data.config?.customAuth}
-          onChange={handleChange}
-          placeholder={`async function authenticate(credentials) {
-  // Your authentication logic here
+          {data.config?.authType === 'custom' && (
+            <ConfigField
+              label="Custom Authentication"
+              type="textarea"
+              field="customAuth"
+              value={data.config?.customAuth}
+              onChange={handleChange}
+              placeholder={`function authenticate(request) {
+  // Your custom authentication logic
   return {
-    success: true,
-    user: { id: '123', name: 'John' }
+    isAuthenticated: true,
+    user: { id: '123', role: 'admin' }
   };
 }`}
-          rows={10}
-          required
-        />
-      )}
+              rows={8}
+              required
+            />
+          )}
 
-      <ConfigField
-        label="Session Management"
-        type="checkbox"
-        field="enableSession"
-        value={data.config?.enableSession}
-        onChange={handleChange}
-      />
-
-      {data.config?.enableSession && (
-        <>
           <ConfigField
-            label="Session Duration (seconds)"
-            type="number"
-            field="sessionDuration"
-            value={data.config?.sessionDuration}
+            label="Enable Rate Limiting"
+            type="switch"
+            field="enableRateLimit"
+            value={data.config?.enableRateLimit}
             onChange={handleChange}
-            min={0}
-            validation="number"
-            required
           />
+
+          {data.config?.enableRateLimit && (
+            <>
+              <ConfigField
+                label="Max Attempts"
+                type="number"
+                field="maxAttempts"
+                value={data.config?.maxAttempts}
+                onChange={handleChange}
+                min={1}
+                validation="number"
+                required
+              />
+              <ConfigField
+                label="Time Window (seconds)"
+                type="number"
+                field="timeWindow"
+                value={data.config?.timeWindow}
+                onChange={handleChange}
+                min={1}
+                validation="number"
+                required
+              />
+              <ConfigField
+                label="Block Duration (seconds)"
+                type="number"
+                field="blockDuration"
+                value={data.config?.blockDuration}
+                onChange={handleChange}
+                min={1}
+                validation="number"
+                required
+              />
+            </>
+          )}
+
           <ConfigField
-            label="Session Store"
+            label="Enable Session Management"
+            type="switch"
+            field="enableSessions"
+            value={data.config?.enableSessions}
+            onChange={handleChange}
+          />
+
+          {data.config?.enableSessions && (
+            <>
+              <ConfigField
+                label="Session Duration (seconds)"
+                type="number"
+                field="sessionDuration"
+                value={data.config?.sessionDuration}
+                onChange={handleChange}
+                min={1}
+                validation="number"
+                required
+              />
+              <ConfigField
+                label="Max Sessions Per User"
+                type="number"
+                field="maxSessions"
+                value={data.config?.maxSessions}
+                onChange={handleChange}
+                min={1}
+                validation="number"
+              />
+              <ConfigField
+                label="Enable Session Renewal"
+                type="switch"
+                field="enableSessionRenewal"
+                value={data.config?.enableSessionRenewal}
+                onChange={handleChange}
+              />
+            </>
+          )}
+
+          <ConfigField
+            label="Error Handling"
             type="select"
-            field="sessionStore"
-            value={data.config?.sessionStore}
+            field="errorHandling"
+            value={data.config?.errorHandling}
             onChange={handleChange}
             options={[
-              { value: 'memory', label: 'In-Memory' },
-              { value: 'redis', label: 'Redis' },
-              { value: 'database', label: 'Database' }
+              { value: '401', label: '401 Unauthorized' },
+              { value: '403', label: '403 Forbidden' },
+              { value: 'redirect', label: 'Redirect to Login' },
+              { value: 'custom', label: 'Custom Handler' }
             ]}
-            required
+          />
+
+          <ConfigField
+            label="Description"
+            type="textarea"
+            field="description"
+            value={data.config?.description}
+            onChange={handleChange}
+            placeholder="Describe the purpose of this authentication configuration"
+            rows={3}
           />
         </>
       )}
-
-      <ConfigField
-        label="Rate Limiting"
-        type="checkbox"
-        field="enableRateLimit"
-        value={data.config?.enableRateLimit}
-        onChange={handleChange}
-      />
-
-      {data.config?.enableRateLimit && (
-        <>
-          <ConfigField
-            label="Max Attempts"
-            type="number"
-            field="maxAttempts"
-            value={data.config?.maxAttempts}
-            onChange={handleChange}
-            min={1}
-            validation="number"
-            required
-          />
-          <ConfigField
-            label="Time Window (seconds)"
-            type="number"
-            field="timeWindow"
-            value={data.config?.timeWindow}
-            onChange={handleChange}
-            min={1}
-            validation="number"
-            required
-          />
-          <ConfigField
-            label="Block Duration (seconds)"
-            type="number"
-            field="blockDuration"
-            value={data.config?.blockDuration}
-            onChange={handleChange}
-            min={0}
-            validation="number"
-          />
-        </>
-      )}
-
-      <ConfigField
-        label="Error Handling"
-        type="select"
-        field="errorHandling"
-        value={data.config?.errorHandling}
-        onChange={handleChange}
-        options={[
-          { value: 'throw', label: 'Throw Error' },
-          { value: 'redirect', label: 'Redirect to Login' },
-          { value: 'callback', label: 'Use Error Callback' }
-        ]}
-      />
-
-      {data.config?.errorHandling === 'redirect' && (
-        <ConfigField
-          label="Login URL"
-          type="text"
-          field="loginUrl"
-          value={data.config?.loginUrl}
-          onChange={handleChange}
-          placeholder="https://app.example.com/login"
-          required
-        />
-      )}
-
-      {data.config?.errorHandling === 'callback' && (
-        <ConfigField
-          label="Error Callback"
-          type="textarea"
-          field="errorCallback"
-          value={data.config?.errorCallback}
-          onChange={handleChange}
-          placeholder={`function handleAuthError(error) {
-  // Handle authentication error
-  console.error(error);
-}`}
-          rows={6}
-          required
-        />
-      )}
-
-      <ConfigField
-        label="Description"
-        type="textarea"
-        field="description"
-        value={data.config?.description}
-        onChange={handleChange}
-        placeholder="Describe the purpose of this authentication"
-        rows={2}
-      />
     </div>
   );
 }

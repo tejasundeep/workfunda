@@ -15,10 +15,19 @@ export default function ConfigField({
   step,
   rows,
   validation,
-  required
+  required,
+  className = ''
 }) {
   const handleChange = (e) => {
-    const newValue = e.target.value;
+    let newValue;
+    
+    if (type === 'checkbox') {
+      newValue = e.target.checked;
+    } else if (type === 'number') {
+      newValue = e.target.value === '' ? '' : Number(e.target.value);
+    } else {
+      newValue = e.target.value;
+    }
     
     // Validation
     if (validation) {
@@ -49,17 +58,45 @@ export default function ConfigField({
 
   const commonProps = {
     id: `config-${field}`,
-    value: value || '',
     onChange: handleChange,
-    placeholder,
     required,
+    className: `form-control-${type} ${className}`,
   };
+
+  if (type === 'checkbox') {
+    return (
+      <Form.Group className="mb-3 d-flex align-items-center">
+        <Form.Check
+          {...commonProps}
+          type="checkbox"
+          label={label}
+          checked={Boolean(value)}
+          className="form-check-input me-2"
+        />
+      </Form.Group>
+    );
+  }
+
+  if (type === 'switch') {
+    return (
+      <Form.Group className="mb-3 d-flex align-items-center">
+        <Form.Check
+          {...commonProps}
+          type="switch"
+          label={label}
+          checked={Boolean(value)}
+          className="form-switch-input me-2"
+        />
+      </Form.Group>
+    );
+  }
 
   return (
     <Form.Group className="mb-3">
       <Form.Label htmlFor={`config-${field}`}>{label}</Form.Label>
       {type === 'select' ? (
-        <Form.Select {...commonProps}>
+        <Form.Select {...commonProps} value={value ?? ''}>
+          <option value="">Select...</option>
           {options?.map(opt => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
@@ -71,6 +108,8 @@ export default function ConfigField({
           {...commonProps}
           as="textarea"
           rows={rows || 3}
+          value={value ?? ''}
+          placeholder={placeholder}
         />
       ) : (
         <Form.Control
@@ -79,6 +118,8 @@ export default function ConfigField({
           min={min}
           max={max}
           step={step}
+          value={value ?? ''}
+          placeholder={placeholder}
         />
       )}
     </Form.Group>
